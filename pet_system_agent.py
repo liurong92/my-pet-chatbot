@@ -21,6 +21,6 @@ def search_memory_data(ctx: RunContext, user_input: str):
 
 @pet_system_agent.tool
 def search_pet_data(ctx: RunContext, user_input: str):
-    print("[TOOL]: Start searching pet database...")
+    print("[TOOL]: Start searching system resource data...")
     return pet_agent.run_sync(user_input, usage=ctx.usage).output
 

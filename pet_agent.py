@@ -18,18 +18,7 @@ pet_agent = Agent(
     """
 )
 
-def load_pet_data():
-    print("[SYSTEM]: Load pet data...")
-    with open("./resource/pet_information.txt", "r") as file:
-        data = [message.replace("\n", '').strip() for message in file.readlines()]
-        create_and_update_memory(
-            collection_name="pet-collection",
-            update_data=data,
-            data_type=DataType.SYSTEM
-        )
-
-
 @pet_agent.tool(name="pet_agent", )
 def get_pet_information(user_input):
     print("[TOOL]: Get pet information...")
-    return search_memery(user_input, collection_name="pet-collection")
+    return search_memery(user_input, collection_name="system-resource")
