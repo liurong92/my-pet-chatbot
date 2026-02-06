@@ -1308,7 +1308,7 @@ wheels = [
 ]
 
 [[package]]
-name = "my-pet-chart-bot"
+name = "my-pet-chatbot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
