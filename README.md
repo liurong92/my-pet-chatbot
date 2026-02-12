@@ -53,6 +53,9 @@ uv sync
 # Activate virtual environment
 source .venv/bin/activate
 
+# Run mcp service
+mcp dev mcp_service.py
+
 # Run project
 uv run python run.py
 

@@ -51,7 +51,7 @@ def create_and_update_memory(collection_name: str, update_data: list[str], data_
 
 
 def search_memery(search_info, collection_name: str = "ai-collection"):
-    print("[SYSTEM]: Search memory...")
+    print(f"[SYSTEM]: Search memory from {collection_name}...")
     if qdrant_client.collection_exists(collection_name):
         return qdrant_client.query_points(
             collection_name=collection_name,
