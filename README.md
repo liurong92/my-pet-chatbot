@@ -63,6 +63,24 @@ docker-componse up
 uv run python run.py
 
 ```
+Or you can use the personal script to run the project
+```bash
+# Sync dependencies
+uv sync
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run mcp service
+mpet start-mcp
+
+# Run docker compose for vector db
+mpet start-db
+
+# Run project
+mpet run-project
+
+```
 
 > notes:
 > [qdrant-client](https://python-client.qdrant.tech/) /
