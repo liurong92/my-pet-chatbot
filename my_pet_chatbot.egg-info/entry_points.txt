@@ -1,0 +1,2 @@
+[console_scripts]
+mpet = tools.cli:app

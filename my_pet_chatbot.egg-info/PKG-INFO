@@ -1,0 +1,87 @@
+Metadata-Version: 2.4
+Name: my-pet-chatbot
+Version: 0.0.1
+Summary: My pet chatbot helper tools
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastembed>=0.7.4
+Requires-Dist: mcp>=1.26.0
+Requires-Dist: pydantic-ai>=1.56.0
+Requires-Dist: pydantic-evals>=1.56.0
+Requires-Dist: pypdf>=6.6.2
+Requires-Dist: qdrant-client>=1.16.2
+
+# My pet chatbot
+
+Using AI(Claude), and RAG, MCP and Memory to communication
+
+## Quick Start
+
+### Install uv
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Set your Claude API Key
+
+You should have Claude account
+
+```bash
+# Claude
+export ANTHROPIC_API_KEY=xxxx
+```
+
+### Or setup Gemini api
+
+#### Get a Gemini API Key
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy your API key
+5. Set it as an environment variable:
+
+#### Change agent model
+```python
+from pydantic_ai import Agent
+
+agent = Agent(
+    model='anthropic:claude-sonnet-4-5',
+    instructions='Your insructions here',
+)
+```
+
+```bash
+# Gemini
+export GEMINI_API_KEY=xxxx
+```
+
+### Run project
+
+```bash
+# Sync dependencies
+uv sync
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run mcp service
+mcp dev mcp_service.py
+
+# Run docker compose for vector db
+docker-componse up
+
+# Run project
+uv run python run.py
+
+```
+
+> notes:
+> [qdrant-client](https://python-client.qdrant.tech/) /
+> [Fast MCP](https://modelcontextprotocol.io/docs/develop/build-server)
+
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
