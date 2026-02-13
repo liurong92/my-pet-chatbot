@@ -56,10 +56,18 @@ source .venv/bin/activate
 # Run mcp service
 mcp dev mcp_service.py
 
+# Run docker compose for vector db
+docker-componse up
+
 # Run project
 uv run python run.py
 
 ```
+
+> notes:
+> [qdrant-client](https://python-client.qdrant.tech/) /
+> [Fast MCP](https://modelcontextprotocol.io/docs/develop/build-server)
+
 
 ## License
 

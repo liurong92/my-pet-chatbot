@@ -11,7 +11,7 @@ from fastembed import TextEmbedding
 embedder = TextEmbedding(
     model_name="BAAI/bge-small-en-v1.5"
 )
-qdrant_client = QdrantClient(":memory:")
+qdrant_client = QdrantClient(url="http://localhost:6333")
 
 
 class DataType(Enum):
@@ -21,6 +21,17 @@ class DataType(Enum):
 
 def create_and_update_memory(collection_name: str, update_data: list[str], data_type: DataType = DataType.SYSTEM):
     print("[SYSTEM]: create and update memory...")
+    if update_data is None:
+        print("[SYSTEM]: No update_data provided (None). Skipping upsert.")
+        return
+    if isinstance(update_data, str):
+        update_data = [update_data]
+
+    valid_data = [data for data in update_data if isinstance(data, str) and data.strip() != ""]
+    if not valid_data:
+        print("[SYSTEM]: No non-empty items to upsert. Skipping upsert.")
+        return
+
     if not qdrant_client.collection_exists(collection_name):
         qdrant_client.create_collection(
             collection_name=collection_name,
@@ -30,24 +41,31 @@ def create_and_update_memory(collection_name: str, update_data: list[str], data_
             ),
         )
 
+    points = []
+    for data in valid_data:
+        try:
+            vector = next(embedder.embed([data]))
+        except Exception as e:
+            print(f"[SYSTEM]: embedder failed for data (skipping): {e}")
+            continue
+
+        points.append(
+            PointStruct(
+                id=uuid.uuid5(uuid.NAMESPACE_DNS, data).hex,
+                vector=vector,
+                payload={"type": data_type, "text": data},
+            )
+        )
+
+    if not points:
+        print("[SYSTEM]: No points were created after embedding. Skipping qdrant upsert.")
+        return
+
+    print(f"[SYSTEM]: Upserting {len(points)} points to collection '{collection_name}'")
     qdrant_client.upsert(
         collection_name=collection_name,
-        points=[
-            PointStruct(
-                id=uuid.uuid5(
-                    uuid.NAMESPACE_DNS,
-                    data
-                ).hex,
-                vector=next(embedder.embed([data])),
-                payload={"type": data_type, "text": data}
-            ) for data in update_data if data != ""],
+        points=points,
     )
-
-    # all = qdrant_client.get_collections().collections
-    # for item in all:
-    #     print("--------------------")
-    #     print(qdrant_client.scroll(collection_name=item.name))
-    #     print(item, '==============')
 
 
 def search_memery(search_info, collection_name: str = "ai-collection"):

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      # Data persistence path. The host directory 'qdrant_storage' will be created automatically.
+      # If you want to specify a different path, replace 'qdrant_storage' with your desired host directory. and remove the 'volumes' section at the bottom of this file.
+      # For example, to use a directory named 'my_qdrant_data' in the current directory, replace the line below with:
+      # - ./my_qdrant_data:/qdrant/storage
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:
