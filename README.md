@@ -57,7 +57,7 @@ source .venv/bin/activate
 mcp dev mcp_service.py
 
 # Run docker compose for vector db
-docker-componse up
+docker-compose up
 
 # Run project
 uv run python run.py
@@ -81,6 +81,21 @@ mpet start-db
 mpet run-project
 
 ```
+
+### Run tests
+
+You can run automated tests to verify the chatbot functionality:
+
+```bash
+# Run the test script
+uv run python test_run.py
+```
+
+The test script will:
+- Load PDF and TXT files from the `resource/` directory
+- Test multiple pet information queries
+- Verify RAG and memory functionality
+- Display results for each test question
 
 > notes:
 > [qdrant-client](https://python-client.qdrant.tech/) /
