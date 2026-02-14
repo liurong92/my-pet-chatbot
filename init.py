@@ -89,18 +89,22 @@ def load_pet_data():
         if file_path.is_file():
             suffix = Path(file_path).suffix
 
-            data = ""
+            data = []
             if suffix.lower() == '.txt':
+                print(f"[SYSTEM]: Loading TXT file: {file_path.name}")
                 with open(file_path, "r") as file:
                     data = [message.replace("\n", '').strip() for message in file.readlines()]
 
-            # if suffix.lower() == '.pdf':
-            #     with open(file_path, "rb") as file:
-            #         reader = PdfReader(file)
-            #         data = [page.extract_text() for page in reader.pages]
+            elif suffix.lower() == '.pdf':
+                print(f"[SYSTEM]: Loading PDF file: {file_path.name}")
+                with open(file_path, "rb") as file:
+                    reader = PdfReader(file)
+                    data = [page.extract_text() for page in reader.pages]
 
-            create_and_update_memory(
-                collection_name="system-resource",
-                update_data=data,
-                data_type=DataType.SYSTEM
-            )
+            if data:
+                create_and_update_memory(
+                    collection_name="system-resource",
+                    update_data=data,
+                    data_type=DataType.SYSTEM
+                )
+                print(f"[SYSTEM]: Successfully loaded {len(data)} items from {file_path.name}")
