@@ -3,14 +3,15 @@ from typing import Any
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import EqualsExpected
 
-from pet_agent import pet_agent, load_pet_data
+from init import load_pet_data
+from pet_system_agent import pet_system_agent
 
 
 def main(inputs: str) -> str:
     load_pet_data()
 
     try:
-        return pet_agent.run_sync(inputs).output
+        return pet_system_agent.run_sync(inputs).output
 
     except Exception as e:
         raise NotImplementedError("")

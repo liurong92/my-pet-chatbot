@@ -38,28 +38,29 @@ Using AI(Claude), and RAG, MCP and Memory to communication
 │           (pet_system_agent.py)                          │
 │  - Orchestrates queries                                  │
 │  - Manages conversation flow                             │
-└───────────────┬─────────────────┬───────────────────────┘
-                │                 │
-                ▼                 ▼
-    ┌──────────────────┐  ┌──────────────────┐
-    │   MCP Service    │  │   Pet Agent      │
-    │ (mcp_service.py) │  │ (pet_agent.py)   │
-    │ - search_memory  │  │ - Get pet info   │
-    │ - get_pet_info   │  └──────────────────┘
-    └─────────┬────────┘
-              │
-              ▼
-    ┌──────────────────────────────┐
-    │    Qdrant Vector Database    │
-    │  ┌────────────────────────┐  │
-    │  │  system-resource       │  │
-    │  │  (PDF/TXT content)     │  │
-    │  └────────────────────────┘  │
-    │  ┌────────────────────────┐  │
-    │  │  ai-collection         │  │
-    │  │  (Conversation history)│  │
-    │  └────────────────────────┘  │
-    └──────────────────────────────┘
+│  - Responds in Chinese                                   │
+└───────────────────┬─────────────────────────────────────┘
+                    │
+                    ▼
+         ┌──────────────────────┐
+         │    MCP Service       │
+         │  (mcp_service.py)    │
+         │  - search_memory     │
+         │  - get_pet_info      │
+         └──────────┬───────────┘
+                    │
+                    ▼
+         ┌──────────────────────────────┐
+         │    Qdrant Vector Database    │
+         │  ┌────────────────────────┐  │
+         │  │  system-resource       │  │
+         │  │  (PDF/TXT content)     │  │
+         │  └────────────────────────┘  │
+         │  ┌────────────────────────┐  │
+         │  │  ai-collection         │  │
+         │  │  (Conversation history)│  │
+         │  └────────────────────────┘  │
+         └──────────────────────────────┘
 ```
 
 ## Quick Start
@@ -212,7 +213,7 @@ uv run python run.py
 >
 ```
 
-### Step 4: Ask Questions
+### Step 4: Ask Questions (in Chinese)
 
 **Example Conversation:**
 
