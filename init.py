@@ -1,12 +1,16 @@
 from __future__ import annotations
 from enum import Enum
 import uuid
+import logging
 
 from pathlib import Path
 from pypdf import PdfReader
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from fastembed import TextEmbedding
+
+# Suppress pypdf warnings for malformed PDF objects
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 embedder = TextEmbedding(
     model_name="BAAI/bge-small-en-v1.5"
@@ -97,9 +101,17 @@ def load_pet_data():
 
             elif suffix.lower() == '.pdf':
                 print(f"[SYSTEM]: Loading PDF file: {file_path.name}")
-                with open(file_path, "rb") as file:
-                    reader = PdfReader(file)
-                    data = [page.extract_text() for page in reader.pages]
+                try:
+                    with open(file_path, "rb") as file:
+                        reader = PdfReader(file)
+                        data = [
+                            page.extract_text()
+                            for page in reader.pages
+                            if page.extract_text().strip()
+                        ]
+                except Exception as e:
+                    print(f"[SYSTEM]: Error loading PDF {file_path.name}: {e}")
+                    continue
 
             if data:
                 create_and_update_memory(
