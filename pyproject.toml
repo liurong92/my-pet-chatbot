@@ -8,9 +8,13 @@ dependencies = [
     "fastembed>=0.7.4",
     "mcp>=1.26.0",
     "pydantic-ai>=1.56.0",
+    "pydantic-ai-slim[google]>=1.58.0",
     "pydantic-evals>=1.56.0",
     "pypdf>=6.6.2",
     "qdrant-client>=1.16.2",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
 ]
 
 [project.scripts]
