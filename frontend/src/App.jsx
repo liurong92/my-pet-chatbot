@@ -3,7 +3,7 @@ import './App.css'
 
 const API_BASE = '/api'
 
-function useChat() {
+function useChat(activeModel) {
   const [messages, setMessages] = useState([])
   const [sessionId, setSessionId] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -50,11 +50,11 @@ function useChat() {
       })
     } catch (_) {}
     setMessages([])
-    setSessionId(null)
     setError(null)
+    // Keep sessionId so server-side settings are retained
   }, [sessionId])
 
-  return { messages, loading, error, sendMessage, resetSession, sessionId }
+  return { messages, loading, error, sendMessage, resetSession, sessionId, setSessionId }
 }
 
 function Message({ msg }) {
@@ -86,8 +86,119 @@ function TypingIndicator() {
   )
 }
 
+function SettingsPanel({ activeModel, sessionId, onSaved, onClear, onClose }) {
+  const [apiKey, setApiKey] = useState('')
+  const [model, setModel] = useState(activeModel || '')
+  const [showKey, setShowKey] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+
+  const handleSave = async () => {
+    if (!apiKey.trim() || !model.trim()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const res = await fetch(`${API_BASE}/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: apiKey.trim(),
+          model: model.trim(),
+          session_id: sessionId,
+        }),
+      })
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}))
+        throw new Error(detail.detail || `HTTP ${res.status}`)
+      }
+      const data = await res.json()
+      setApiKey('')   // clear from local state immediately after sending
+      onSaved(data.session_id, data.model)
+      onClose()
+    } catch (err) {
+      setSaveError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleClear = () => {
+    setApiKey('')
+    setModel('')
+    onClear()
+    onClose()
+  }
+
+  return (
+    <div className="settings-panel">
+      <div className="settings-header">
+        <span className="settings-title">自定义模型设置</span>
+        <button className="settings-close" onClick={onClose} aria-label="关闭">✕</button>
+      </div>
+
+      <div className="settings-body">
+        <label className="settings-label">
+          API Token
+          <div className="settings-input-row">
+            <input
+              type={showKey ? 'text' : 'password'}
+              className="settings-input"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={activeModel ? '已配置，重新输入以更新' : 'sk-ant-...'}
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <button
+              type="button"
+              className="toggle-visibility"
+              onClick={() => setShowKey((v) => !v)}
+              aria-label={showKey ? '隐藏' : '显示'}
+            >
+              {showKey ? '🙈' : '👁'}
+            </button>
+          </div>
+        </label>
+
+        <label className="settings-label">
+          Model
+          <input
+            type="text"
+            className="settings-input"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            placeholder="anthropic:claude-sonnet-4-5"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <span className="settings-hint">
+            支持格式：<code>anthropic:claude-...</code>、<code>openai:gpt-...</code>、<code>google-gla:gemini-...</code>
+          </span>
+        </label>
+
+        {saveError && <p className="settings-error">⚠️ {saveError}</p>}
+      </div>
+
+      <div className="settings-actions">
+        {activeModel && (
+          <button className="settings-btn-clear" onClick={handleClear}>清除配置</button>
+        )}
+        <button
+          className="settings-btn-save"
+          onClick={handleSave}
+          disabled={saving || !apiKey.trim() || !model.trim()}
+        >
+          {saving ? '保存中…' : '保存'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
-  const { messages, loading, error, sendMessage, resetSession, sessionId } = useChat()
+  const [activeModel, setActiveModel] = useState(null) // model name stored on server
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const { messages, loading, error, sendMessage, resetSession, sessionId, setSessionId } = useChat(activeModel)
   const [input, setInput] = useState('')
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
@@ -112,6 +223,18 @@ export default function App() {
     }
   }
 
+  const handleSettingsSaved = (newSessionId, model) => {
+    setSessionId(newSessionId)
+    setActiveModel(model)
+  }
+
+  const handleSettingsClear = () => {
+    setActiveModel(null)
+    // Session still exists server-side, but api_key/model will be cleared on next save
+    // For a full clear we could call a dedicated endpoint; here we just reset local state
+    setSessionId(null)
+  }
+
   const suggestions = [
     "What is Rong's pet name?",
     "Tell me about April's colors",
@@ -130,15 +253,37 @@ export default function App() {
             <p className="header-subtitle">Ask me anything about your pets</p>
           </div>
         </div>
-        <button
-          className="reset-btn"
-          onClick={resetSession}
-          disabled={!sessionId && messages.length === 0}
-          title="Start new conversation"
-        >
-          New Chat
-        </button>
+        <div className="header-actions">
+          <button
+            className={`settings-btn ${activeModel ? 'settings-btn-active' : ''}`}
+            onClick={() => setSettingsOpen((v) => !v)}
+            title="自定义模型"
+            aria-label="设置"
+          >
+            ⚙
+            {activeModel && <span className="settings-badge" />}
+          </button>
+          <button
+            className="reset-btn"
+            onClick={resetSession}
+            disabled={!sessionId && messages.length === 0}
+            title="Start new conversation"
+          >
+            New Chat
+          </button>
+        </div>
       </header>
+
+      {/* Settings panel */}
+      {settingsOpen && (
+        <SettingsPanel
+          activeModel={activeModel}
+          sessionId={sessionId}
+          onSaved={handleSettingsSaved}
+          onClear={handleSettingsClear}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       {/* Messages */}
       <main className="chat-messages">
@@ -200,7 +345,11 @@ export default function App() {
             </svg>
           </button>
         </form>
-        <p className="footer-note">Powered by Claude · Pet data stored in Qdrant</p>
+        <p className="footer-note">
+          {activeModel
+            ? `自定义模型: ${activeModel}`
+            : 'Powered by Claude · Pet data stored in Qdrant'}
+        </p>
       </footer>
     </div>
   )
