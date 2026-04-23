@@ -12,8 +12,8 @@ from pydantic_ai import Agent
 from mcp_service import toolsets
 
 # Model configuration
-MODEL_NAME = "anthropic:claude-sonnet-4-5"
-# MODEL_NAME = "google-gla:gemini-3-flash-preview"
+# MODEL_NAME = "anthropic:claude-sonnet-4-5"
+MODEL_NAME = "google-gla:gemini-3-flash-preview"
 
 # Agent instructions
 SYSTEM_INSTRUCTIONS = """
